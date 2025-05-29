@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tapa Buracos - Nova Iguaçu</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+
+    input,
+    button {
+      margin: 5px;
+      padding: 8px;
+    }
+
+    .buraco {
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      background-color: white;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Tapa Buracos - Nova Iguaçu</h1>
+
+  <label>Rua:</label><br>
+  <input type="text" id="rua" placeholder="Digite o nome da rua"><br><br>
+
+  <div id="buracosContainer"></div>
+
+  <button onclick="adicionarBuraco()">Adicionar Buraco</button><br><br>
+
+  <label>Fotos (opcional):</label><br>
+  <input type="file" id="fotos" multiple><br><br>
+
+  <button onclick="salvar()">Salvar Dados</button>
+
+  <div id="status"></div>
+
+  <script>
+    let contador = 1;
+
+    function adicionarBuraco() {
+      const container = document.getElementById('buracosContainer');
+      const div = document.createElement('div');
+      div.className = 'buraco';
+      div.id = 'buraco' + contador;
+      div.innerHTML = `
+      <strong>TAPA BURACO ${contador}</strong><br>
+      Largura (m): <input type="number" id="largura${contador}" step="0.01"><br>
+      Comprimento (m): <input type="number" id="comprimento${contador}" step="0.01"><br>
+      Espessura (cm): <input type="number" id="espessura${contador}" step="0.01"><br>
+      <button onclick="removerBuraco('${div.id}')">Remover</button>
+    `;
+      container.appendChild(div);
+      contador++;
+    }
+
+    function removerBuraco(id) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }
+
+    function salvar() {
+      const rua = document.getElementById('rua').value.trim();
+      if (!rua) {
+        alert('Digite a rua');
+        return;
+      }
+
+      const buracos = [];
+      for (let i = 1; i < contador; i++) {
+        const largura = document.getElementById(`largura${i}`);
+        const comprimento = document.getElementById(`comprimento${i}`);
+        const espessura = document.getElementById(`espessura${i}`);
+
+        if (largura && comprimento && espessura) {
+          if (!largura.value || !comprimento.value || !espessura.value) {
+            alert(`Preencha todos os campos do buraco ${i}`);
+            return;
+          }
+          buracos.push({
+            identificador: `TAPA BURACO ${i}`,
+            largura: parseFloat(largura.value),
+            comprimento: parseFloat(comprimento.value),
+            espessura: parseFloat(espessura.value)
+          });
+        }
+      }
+
+      if (buracos.length === 0) {
+        alert('Adicione ao menos um buraco');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('dados', JSON.stringify({ rua, buracos }));
+
+      const fotos = document.getElementById('fotos').files;
+      for (let i = 0; i < fotos.length; i++) {
+        formData.append('fotos', fotos[i]);
+      }
+
+      document.getElementById('status').innerText = 'Enviando...';
+
+      fetch('/api/salvar', {
+        method: 'POST',
+        body: formData
+      })
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('status').innerText = data.message;
+          document.getElementById('rua').value = '';
+          document.getElementById('buracosContainer').innerHTML = '';
+          document.getElementById('fotos').value = '';
+          contador = 1;
+        })
+        .catch(err => {
+          console.error(err);
+          document.getElementById('status').innerText = 'Erro ao salvar';
+        });
+    }
+  </script>
+
+</body>
+
+</html>
