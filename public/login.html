@@ -2,18 +2,24 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <base target="_top">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Tapa Buracos NI</title>
+    
+    <link rel="manifest" href="/manifest.json">
+    
+    <meta name="theme-color" content="#007bff"> 
+    
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png"> 
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="TapaBuracosNI">
+
     <style>
         :root {
-            --primary-color: #007bff;
-            --primary-hover-color: #0056b3;
-            --error-color: #dc3545;
-            --light-gray-color: #f0f2f5;
-            --text-color: #333;
-            --border-color: #ced4da;
-            --white-color: #fff;
-            --input-focus-border: #80bdff;
+            --primary-color: #007bff; --primary-hover-color: #0056b3; --error-color: #dc3545;
+            --light-gray-color: #f0f2f5; --text-color: #333; --border-color: #ced4da;
+            --white-color: #fff; --input-focus-border: #80bdff;
             --input-focus-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
         }
         body {
@@ -81,7 +87,6 @@
         const loginButton = document.getElementById('loginButton');
         const errorMessageDiv = document.getElementById('errorMessage');
 
-        // Redirecionar se já estiver logado
         if (localStorage.getItem('loggedInUser')) {
             window.location.href = '/index.html';
         }
@@ -123,12 +128,25 @@
                 errorMessageDiv.textContent = 'Erro de comunicação. Tente mais tarde.';
             })
             .finally(() => {
-                if (!localStorage.getItem('loggedInUser')) { // Só reabilita se não houve sucesso/redirecionamento
+                if (!localStorage.getItem('loggedInUser')) { 
                     loginButton.disabled = false;
                     loginButton.textContent = 'Entrar';
                 }
             });
         });
+
+        // Registro do Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                console.log('Service Worker (login.html): Registrado com sucesso, escopo:', registration.scope);
+                })
+                .catch(error => {
+                console.error('Service Worker (login.html): Falha no registro:', error);
+                });
+            });
+        }
     </script>
 </body>
 </html>
