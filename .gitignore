@@ -3,3 +3,5 @@ credentials.json
 uploads
 .env
 Backup/
+firebase-credentials.json
+serviceAccountKey.json
