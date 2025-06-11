@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Registros - Nova Iguaçu</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/relatorio.css">
+</head>
+<body>
+    <nav class="main-nav">
+        <a href="/index.html" class="nav-brand">TapaBuracosNI</a>
+        <div class="nav-links">
+            <a href="/index.html">Novo Registro</a>
+            <a href="/relatorio.html" class="active">Relatórios</a>
+        </div>
+        <div class="user-info">
+            <span>Logado como:&nbsp;</span><strong id="user-display-name"></strong>
+            <button id="logoutBtn">Sair</button>
+        </div>
+        <button class="nav-toggle" aria-label="Abrir menu">☰</button>
+    </nav>
+    
+    <div class="container">
+        <h1>Relatório de Registros</h1>
+        
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label for="filtro-rua">Pesquisar por Rua:</label>
+                <input type="text" id="filtro-rua" placeholder="Digite o nome da rua...">
+            </div>
+        </div>
+
+        <div id="loading">Carregando dados...</div>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Data da Visita</th>
+                    <th>Rua</th>
+                    <th>Bairro</th>
+                    <th>Registrado Por</th>
+                    <th>Ação da Visita</th>
+                </tr>
+            </thead>
+            <tbody id="report-table-body">
+                </tbody>
+        </table>
+    </div>
+
+    <script src="/js/auth.js" defer></script>
+    <script src="/js/relatorio.js" defer></script>
+</body>
+</html>

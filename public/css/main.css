@@ -1,0 +1,114 @@
+/* public/css/main.css */
+
+/* --- VARIÁVEIS DE COR PARA UM DESIGN PROFISSIONAL --- */
+:root {
+    --cor-primaria: #3498db;      /* Um azul mais moderno */
+    --cor-primaria-hover: #2980b9;
+    --cor-sucesso: #2ecc71;
+    --cor-perigo: #e74c3c;
+    --cor-info: #5dade2;
+    --cor-cinza: #95a5a6;
+    --fundo-pagina: #f4f7f6;     /* Fundo suave */
+    --fundo-container: #ffffff;
+    --borda-cor: #dce4e8;
+    --texto-titulo: #2c3e50;
+    --texto-corpo: #34495e;
+    --texto-label: #7f8c8d;
+    --sombra-suave: 0 4px 15px rgba(0, 0, 0, 0.07);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    padding-top: 80px; /* Espaço para o menu fixo */
+    background-color: var(--fundo-pagina);
+    color: var(--texto-corpo);
+    line-height: 1.6;
+}
+
+/* --- MENU DE NAVEGAÇÃO COM VISUAL MODERNO --- */
+.main-nav {
+    background-color: var(--fundo-container);
+    padding: 0 25px;
+    height: 65px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--sombra-suave);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    border-bottom: 1px solid var(--borda-cor);
+}
+
+.main-nav .nav-brand {
+    color: var(--texto-titulo);
+    font-size: 1.6em;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.main-nav .nav-links {
+    display: flex;
+}
+
+.main-nav .nav-links a {
+    color: var(--texto-corpo);
+    text-decoration: none;
+    font-size: 1em;
+    font-weight: 500;
+    margin: 0 15px;
+    padding: 5px 0;
+    border-bottom: 3px solid transparent;
+    transition: color 0.2s, border-bottom-color 0.2s;
+}
+
+.main-nav .nav-links a:hover, .main-nav .nav-links a.active {
+    color: var(--cor-primaria);
+    border-bottom-color: var(--cor-primaria);
+}
+
+.main-nav .user-info {
+    color: var(--texto-corpo);
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+}
+
+.main-nav .user-info #logoutBtn {
+    background-color: var(--cor-cinza);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 15px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+.main-nav .user-info #logoutBtn:hover { background-color: #7f8c8d; }
+
+.nav-toggle { display: none; background: none; border: none; color: var(--texto-titulo); font-size: 28px; cursor: pointer; }
+
+/* --- RESPONSIVIDADE DO MENU --- */
+@media (max-width: 820px) {
+    .main-nav .nav-links {
+        display: none;
+        position: absolute;
+        top: 65px;
+        right: 0;
+        background-color: var(--fundo-container);
+        width: 100%;
+        flex-direction: column;
+        text-align: center;
+        padding: 10px 0;
+        box-shadow: var(--sombra-suave);
+        border-top: 1px solid var(--borda-cor);
+    }
+    .main-nav .nav-links.active { display: flex; }
+    .main-nav .nav-links a { margin: 12px 0; padding: 10px; width: 100%; }
+    .nav-toggle { display: block; }
+    .user-info span { display: none; }
+}

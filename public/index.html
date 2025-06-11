@@ -1,549 +1,73 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <meta charset="UTF-8">
-  <base target="_top">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tapa Buracos - Nova Iguaçu</title>
-
-  <link rel="manifest" href="/manifest.json">
-
-  <meta name="theme-color" content="#007bff">
-
-  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="TapaBuracosNI">
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f4;
-      color: #333;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 750px;
-      margin: 20px;
-      background-color: #fff;
-      padding: 20px 25px 30px 25px;
-      border-radius: 8px;
-      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
-    }
-
-    label {
-      display: block;
-      margin-top: 15px;
-      margin-bottom: 8px;
-      font-weight: bold;
-      font-size: 0.95em;
-    }
-
-    input[type="text"],
-    input[type="file"],
-    input[inputmode="decimal"],
-    select#bairroSelect {
-      /* Adicionado select#bairroSelect */
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      box-sizing: border-box;
-      margin-bottom: 10px;
-      font-size: 1rem;
-      background-color: #fff;
-      /* Garante fundo branco para select */
-    }
-
-    select#bairroSelect {
-      height: calc(2.25rem + 12px + 2px);
-      /* Tenta alinhar com altura dos inputs */
-    }
-
-    #sugestoes {
-      border: 1px solid #ddd;
-      border-top: none;
-      max-height: 200px;
-      overflow-y: auto;
-      margin-top: -11px;
-      padding: 0;
-      background-color: #fff;
-      border-radius: 0 0 4px 4px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      position: relative;
-      z-index: 1000;
-    }
-
-    .sugestao-item {
-      padding: 10px;
-      cursor: pointer;
-      border-bottom: 1px solid #eee;
-      font-size: 0.95rem;
-    }
-
-    .sugestao-item:last-child {
-      border-bottom: none;
-    }
-
-    .sugestao-item:hover,
-    .sugestao-item.active {
-      background-color: #e9e9e9;
-    }
-
-    .sugestao-item strong {
-      font-weight: bold;
-      color: #007bff;
-    }
-
-    h1,
-    h2 {
-      color: #333;
-      text-align: center;
-    }
-
-    h1 {
-      margin-bottom: 25px;
-      font-size: 1.8em;
-    }
-
-    h2 {
-      margin-top: 20px;
-      margin-bottom: 15px;
-      font-size: 1.3em;
-      border-top: 1px solid #eee;
-      padding-top: 20px;
-    }
-
-    .buraco-entry {
-      border: 1px solid #eee;
-      padding: 15px;
-      margin-top: 15px;
-      border-radius: 6px;
-      background-color: #f9f9f9;
-    }
-
-    .buraco-entry label {
-      margin-top: 5px;
-      font-weight: normal;
-      font-size: 0.9em;
-    }
-
-    .buraco-header {
-      font-weight: bold;
-      margin-bottom: 10px;
-      font-size: 1.05em;
-      color: #555;
-    }
-
-    button {
-      background-color: #007bff;
-      color: white;
-      padding: 10px 18px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 1em;
-      margin-top: 10px;
-      margin-right: 10px;
-      transition: background-color 0.2s ease;
-    }
-
-    button:hover:not(:disabled) {
-      background-color: #0056b3;
-    }
-
-    button:disabled {
-      background-color: #cccccc;
-      cursor: not-allowed;
-    }
-
-    .remove-buraco-btn {
-      background-color: #dc3545;
-      font-size: 0.8em;
-      padding: 6px 10px;
-      margin-top: 0px;
-    }
-
-    .remove-buraco-btn:hover {
-      background-color: #c82333;
-    }
-
-    #addBuracoBtn {
-      background-color: #17a2b8;
-    }
-
-    #addBuracoBtn:hover {
-      background-color: #138496;
-    }
-
-    #salvarTudoBtn {
-      background-color: #28a745;
-      font-size: 1.1em;
-      padding: 12px 22px;
-    }
-
-    #salvarTudoBtn:hover {
-      background-color: #218838;
-    }
-
-    #statusSalvar {
-      margin-top: 15px;
-      font-weight: bold;
-      text-align: center;
-      min-height: 20px;
-      padding: 8px;
-      border-radius: 4px;
-    }
-
-    #statusSalvar.success {
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-
-    #statusSalvar.error {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-
-    .spinner {
-      border: 4px solid rgba(0, 0, 0, 0.1);
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      border-left-color: #007bff;
-      animation: spin 1s ease infinite;
-      display: none;
-      margin: 10px auto;
-    }
-
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-
-    .tempo-container {
-      margin-top: 10px;
-      margin-bottom: 15px;
-      padding: 10px;
-      border: 1px solid #eee;
-      border-radius: 4px;
-      background-color: #f9f9f9;
-    }
-
-    .tempo-container label {
-      margin-right: 15px;
-      font-weight: normal;
-      display: inline-block;
-      cursor: pointer;
-    }
-
-    .tempo-container input[type="radio"] {
-      margin-right: 5px;
-      vertical-align: middle;
-      width: auto;
-      cursor: pointer;
-    }
-
-    hr {
-      border: none;
-      border-top: 1px solid #eee;
-      margin-top: 25px;
-      margin-bottom: 20px;
-    }
-
-    .form-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      align-items: flex-start;
-      margin-bottom: 10px;
-    }
-
-    .form-column {
-      flex: 1;
-      min-width: 250px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tapa Buracos - Novo Registro</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#007bff">
+    
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/index.css">
 </head>
-
 <body>
-  <div class="container">
-    <h1>Tapa Buracos - Nova Iguaçu</h1>
+    <nav class="main-nav">
+        <a href="/index.html" class="nav-brand">TapaBuracosNI</a>
+        <div class="nav-links">
+            <a href="/index.html" class="active">Novo Registro</a>
+            <a href="/relatorio.html">Relatórios</a>
+        </div>
+        <div class="user-info">
+            <span>Logado como:&nbsp;</span><strong id="user-display-name"></strong>
+            <button id="logoutBtn">Sair</button>
+        </div>
+        <button class="nav-toggle" aria-label="Abrir menu">☰</button>
+    </nav>
 
-    <div class="form-row">
-      <div class="form-column rua-column">
-        <label for="ruaInput">1.1 Digite ou selecione o nome da rua:</label>
-        <input type="text" id="ruaInput" name="ruaInput" autocomplete="off" placeholder="Ex: Rua Dom Adriano (mín. 2 letras)">
-        <div id="sugestoes" style="display:none;"></div>
-      </div>
-      <div class="form-column bairro-column">
-        <label for="bairroSelect">1.2 Selecione o Bairro:</label>
-        <select id="bairroSelect" name="bairroSelect">
-          <option value="">Carregando bairros...</option>
-        </select>
-      </div>
+    <div class="container">
+        <h1>Tapa Buracos - Nova Iguaçu</h1>
+
+        <div class="form-row">
+            <div class="form-column">
+                <label for="ruaInput">1.1 Digite ou selecione o nome da rua:</label>
+                <input type="text" id="ruaInput" name="ruaInput" autocomplete="off" placeholder="Ex: Rua Dom Adriano (mín. 2 letras)">
+                <div id="sugestoes" style="display:none;"></div>
+            </div>
+            <div class="form-column">
+                <label for="bairroSelect">1.2 Selecione o Bairro:</label>
+                <select id="bairroSelect" name="bairroSelect">
+                    <option value="">Carregando bairros...</option>
+                </select>
+            </div>
+        </div>
+
+        <h2>2. Registre os Buracos para a Rua Selecionada</h2>
+        <div id="buracosContainer"></div>
+        <button type="button" id="addBuracoBtn">Adicionar Novo Buraco</button>
+
+        <h2>3. Condição do Tempo</h2>
+        <div class="tempo-container">
+            <input type="radio" id="tempoBom" name="condicaoTempo" value="Bom" checked>
+            <label for="tempoBom">Bom</label>
+            
+            <input type="radio" id="tempoNublado" name="condicaoTempo" value="Nublado">
+            <label for="tempoNublado">Nublado</label>
+
+            <input type="radio" id="tempoChuva" name="condicaoTempo" value="Chuva">
+            <label for="tempoChuva">Chuva</label>
+        </div>
+
+        <label for="fotoGeralInput" style="margin-top: 30px;">4. Adicionar Foto(s) da Visita (Opcional):</label>
+        <input type="file" id="fotoGeralInput" name="fotoGeralInput" accept="image/*" multiple>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button type="button" id="salvarTudoBtn">Salvar Dados dos Buracos</button>
+            <div class="spinner" id="loadingSpinner"></div>
+        </div>
+        <div id="statusSalvar"></div>
     </div>
 
-    <h2>2. Registre os Buracos para a Rua Selecionada:</h2>
-    <div id="buracosContainer"></div>
-    <button type="button" id="addBuracoBtn">Adicionar Novo Buraco</button>
-
-    <h2>3. Condição do Tempo:</h2>
-    <div class="tempo-container" id="tempoContainer">
-      <input type="radio" id="tempoBom" name="condicaoTempo" value="Bom" checked>
-      <label for="tempoBom">Bom</label>
-      <input type="radio" id="tempoNublado" name="condicaoTempo" value="Nublado">
-      <label for="tempoNublado">Nublado</label>
-      <input type="radio" id="tempoChuva" name="condicaoTempo" value="Chuva">
-      <label for="tempoChuva">Chuva</label>
-    </div>
-
-    <label for="fotoGeralInput">4. Adicionar Foto(s) Geral(is) (Opcional):</label>
-    <input type="file" id="fotoGeralInput" name="fotoGeralInput" accept="image/*" multiple>
-
-    <div style="text-align: center; margin-top: 30px;">
-      <button type="button" id="salvarTudoBtn">Salvar Dados dos Buracos</button>
-      <div class="spinner" id="loadingSpinner"></div>
-    </div>
-    <div id="statusSalvar"></div>
-  </div>
-
-  <script>
-    const ruaInputElement = document.getElementById('ruaInput');
-    const sugestoesDivElement = document.getElementById('sugestoes');
-    const bairroSelectElement = document.getElementById('bairroSelect');
-    const buracosContainerElement = document.getElementById('buracosContainer');
-    const addBuracoBtnElement = document.getElementById('addBuracoBtn');
-    const salvarTudoBtnElement = document.getElementById('salvarTudoBtn');
-    const statusSalvarElement = document.getElementById('statusSalvar');
-    const loadingSpinnerElement = document.getElementById('loadingSpinner');
-    const fotoGeralInputElement = document.getElementById('fotoGeralInput');
-
-    let debounceTimer;
-    let nextUniqueBuracoId = 1;
-    let ruasSugeridas = [];
-
-    document.addEventListener('DOMContentLoaded', function () {
-      const loggedInUser = localStorage.getItem('loggedInUser');
-      if (!loggedInUser) {
-        window.location.href = '/login.html';
-        return;
-      }
-
-      console.log('Usuário logado:', loggedInUser);
-      const containerDiv = document.querySelector('.container');
-      if (containerDiv) {
-        const userDisplay = document.createElement('div');
-        userDisplay.style.textAlign = 'right';
-        userDisplay.style.marginBottom = '15px';
-        userDisplay.style.fontSize = '0.9em';
-        userDisplay.innerHTML = `Logado como: <strong>${loggedInUser}</strong> <button id="logoutBtn" type="button" style="font-size:0.9em; padding:5px 8px; margin-left:10px; background-color:#6c757d; color:white; border:none; border-radius:4px; cursor:pointer;">Sair</button>`;
-
-        if (containerDiv.firstChild) {
-          containerDiv.insertBefore(userDisplay, containerDiv.firstChild);
-        } else {
-          containerDiv.appendChild(userDisplay);
-        }
-
-        document.getElementById('logoutBtn').addEventListener('click', function () {
-          localStorage.removeItem('loggedInUser');
-          window.location.href = '/login.html';
-        });
-      }
-
-      carregarBairros(); // Carrega os bairros
-      adicionarNovoBuraco(); // Adiciona o primeiro buraco
-      ruaInputElement.focus(); // Foca no input da rua
-    });
-
-    function removerAcentosClientSide(texto) { /* ... sua função ... */ return texto.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
-
-    function carregarBairros() {
-      fetch('/api/buscar-bairros')
-        .then(response => {
-          if (!response.ok) throw new Error('Erro ao buscar bairros: ' + response.statusText);
-          return response.json();
-        })
-        .then(bairros => {
-          bairroSelectElement.innerHTML = '<option value="">Selecione um bairro</option>';
-          if (bairros && bairros.length > 0) {
-            bairros.forEach(bairro => {
-              const option = document.createElement('option');
-              option.value = bairro;
-              option.textContent = bairro;
-              bairroSelectElement.appendChild(option);
-            });
-          } else {
-            bairroSelectElement.innerHTML = '<option value="">Nenhum bairro encontrado</option>';
-          }
-        })
-        .catch(error => {
-          console.error('Falha ao carregar bairros:', error);
-          bairroSelectElement.innerHTML = '<option value="">Erro ao carregar bairros</option>';
-        });
-    }
-
-    ruaInputElement.addEventListener('input', function (event) { /* ... sua lógica de autocomplete ... */
-      clearTimeout(debounceTimer);
-      const textoDigitado = event.target.value;
-      if (textoDigitado.length < 2) {
-        sugestoesDivElement.innerHTML = ''; sugestoesDivElement.style.display = 'none'; return;
-      }
-      debounceTimer = setTimeout(() => {
-        sugestoesDivElement.innerHTML = '<div class="sugestao-item">Buscando...</div>';
-        sugestoesDivElement.style.display = 'block';
-        fetch('/api/buscar-ruas?texto=' + encodeURIComponent(textoDigitado))
-          .then(response => { if (!response.ok) { throw new Error('Erro na rede: ' + response.statusText); } return response.json(); })
-          .then(listaDeRuas => { exibirSugestoes(listaDeRuas, textoDigitado); })
-          .catch(erro => { console.error('Erro ao buscar ruas:', erro); sugestoesDivElement.innerHTML = '<div class="sugestao-item">Erro.</div>'; sugestoesDivElement.style.display = 'block'; });
-      }, 350);
-    });
-
-    function exibirSugestoes(ruas, textoDigitado) { /* ... sua lógica ... */
-      sugestoesDivElement.innerHTML = ''; ruasSugeridas = ruas;
-      if (ruas && ruas.length > 0) {
-        sugestoesDivElement.style.display = 'block';
-        ruas.forEach(function (rua, index) {
-          const divItem = document.createElement('div'); divItem.className = 'sugestao-item'; divItem.setAttribute('data-index', index);
-          const textoBuscaLower = removerAcentosClientSide(textoDigitado.toLowerCase());
-          const ruaOriginalLowerSemAcento = removerAcentosClientSide(rua.toLowerCase());
-          const startIndex = ruaOriginalLowerSemAcento.indexOf(textoBuscaLower);
-          if (startIndex > -1) {
-            let highlightedHTML = ""; let currentIndexSemAcento = 0;
-            for (const charOriginal of rua) {
-              const charOriginalSemAcento = removerAcentosClientSide(charOriginal.toLowerCase());
-              if (currentIndexSemAcento >= startIndex && currentIndexSemAcento < startIndex + textoBuscaLower.length && textoBuscaLower.length > 0) { highlightedHTML += '<strong>' + charOriginal + '</strong>'; }
-              else { highlightedHTML += charOriginal; }
-              if (charOriginalSemAcento.length > 0) { currentIndexSemAcento += charOriginalSemAcento.length; }
-            }
-            divItem.innerHTML = highlightedHTML;
-          } else { divItem.textContent = rua; }
-          divItem.addEventListener('click', function () { selecionarRua(rua); });
-          sugestoesDivElement.appendChild(divItem);
-        });
-      } else { sugestoesDivElement.innerHTML = '<div class="sugestao-item">Nenhuma rua.</div>'; sugestoesDivElement.style.display = 'block'; }
-    }
-
-    function selecionarRua(rua) { /* ... sua lógica ... */ ruaInputElement.value = rua; sugestoesDivElement.innerHTML = ''; sugestoesDivElement.style.display = 'none'; resetarFormularioParaNovaRua(); document.getElementById('bairroSelect').focus(); }
-    document.addEventListener('click', function (event) { /* ... sua lógica ... */ if (!ruaInputElement.contains(event.target) && !sugestoesDivElement.contains(event.target)) { sugestoesDivElement.innerHTML = ''; sugestoesDivElement.style.display = 'none'; } });
-    function resetarFormularioParaNovaRua() { /* ... sua lógica ... */ nextUniqueBuracoId = 1; buracosContainerElement.innerHTML = ''; fotoGeralInputElement.value = ''; document.getElementById('tempoBom').checked = true; adicionarNovoBuraco(); }
-    function limparFormularioAposSucesso() { /* ... sua lógica ... */ ruaInputElement.value = ''; sugestoesDivElement.innerHTML = ''; sugestoesDivElement.style.display = 'none'; bairroSelectElement.value = ""; nextUniqueBuracoId = 1; buracosContainerElement.innerHTML = ''; fotoGeralInputElement.value = ''; document.getElementById('tempoBom').checked = true; statusSalvarElement.textContent = ''; statusSalvarElement.className = ''; ruaInputElement.focus(); }
-    function renumerarBuracosVisualmente() { /* ... sua lógica ... */ const buracoEntries = buracosContainerElement.getElementsByClassName('buraco-entry'); for (let i = 0; i < buracoEntries.length; i++) { const header = buracoEntries[i].querySelector('.buraco-header'); if (header) { header.textContent = `TAPA BURACO ${i + 1}`; } } }
-    function adicionarNovoBuraco() { /* ... sua lógica com innerHTML ... */
-      const buracoId = nextUniqueBuracoId++; const novoBuracoDiv = document.createElement('div'); novoBuracoDiv.className = 'buraco-entry'; novoBuracoDiv.id = 'buracoEntry_' + buracoId;
-      novoBuracoDiv.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center;"> <div class="buraco-header">TAPA BURACO X</div> <button type="button" class="remove-buraco-btn" onclick="removerBuraco('${novoBuracoDiv.id}')">Remover</button> </div>
-        <label for="largura_${buracoId}">Largura (m) (use vírgula):</label> <input type="text" inputmode="decimal" id="largura_${buracoId}" placeholder="Ex: 0,80">
-        <label for="comprimento_${buracoId}">Comprimento (m) (use vírgula):</label> <input type="text" inputmode="decimal" id="comprimento_${buracoId}" placeholder="Ex: 1,20">
-        <label for="espessura_${buracoId}">Espessura (cm) (use vírgula):</label> <input type="text" inputmode="decimal" id="espessura_${buracoId}" placeholder="Ex: 5,00">`;
-      buracosContainerElement.appendChild(novoBuracoDiv);
-      const camposNumericos = novoBuracoDiv.querySelectorAll('input[inputmode="decimal"]');
-      camposNumericos.forEach(function (campo) { campo.addEventListener('input', manejarInputNumericoComVirgula); campo.addEventListener('blur', formatarAoSairComVirgula); });
-      renumerarBuracosVisualmente();
-      if (buracoId === 1 && !ruaInputElement.value && !bairroSelectElement.value) { ruaInputElement.focus(); }
-      else { novoBuracoDiv.querySelector('input[inputmode="decimal"]').focus(); }
-    }
-    window.removerBuraco = function (elementId) { /* ... sua lógica ... */ const buracoParaRemover = document.getElementById(elementId); if (buracoParaRemover) { buracoParaRemover.remove(); renumerarBuracosVisualmente(); } }
-    addBuracoBtnElement.addEventListener('click', adicionarNovoBuraco);
-    function manejarInputNumericoComVirgula(event) { /* ... sua lógica ... */
-      let input = event.target; let valor = input.value; let cursorPos = input.selectionStart;
-      valor = valor.replace(/\./g, ','); let valorFiltrado = ""; let virgulaEncontrada = false; let casasDecimais = 0;
-      for (let i = 0; i < valor.length; i++) {
-        const char = valor[i];
-        if (char >= '0' && char <= '9') { if (virgulaEncontrada) { if (casasDecimais < 2) { valorFiltrado += char; casasDecimais++; } } else { valorFiltrado += char; } }
-        else if (char === ',' && !virgulaEncontrada) { valorFiltrado += char; virgulaEncontrada = true; }
-      } valor = valorFiltrado;
-      if (input.value !== valor) { input.value = valor; if (cursorPos <= valor.length) { input.setSelectionRange(cursorPos, cursorPos); } else { input.setSelectionRange(valor.length, valor.length); } }
-    }
-    function formatarAoSairComVirgula(event) { /* ... sua lógica ... */
-      let input = event.target; let valor = input.value.trim(); if (valor === '') { input.value = ''; return; }
-      let valorParaFloat = valor.replace(',', '.');
-      if (!isNaN(parseFloat(valorParaFloat)) && isFinite(valorParaFloat)) { let numero = parseFloat(valorParaFloat); input.value = numero.toFixed(2).replace('.', ','); }
-      else { input.value = ''; }
-    }
-
-    salvarTudoBtnElement.addEventListener('click', function () {
-      const ruaSelecionada = ruaInputElement.value.trim();
-      const bairroSelecionado = bairroSelectElement.value; // Pega o valor do bairro
-      // ... (suas validações existentes, incluindo para bairroSelecionado se for obrigatório)
-      if (!ruaSelecionada) { alert('Por favor, selecione uma rua.'); ruaInputElement.focus(); return; }
-      if (!bairroSelecionado) { alert('Por favor, selecione um bairro.'); bairroSelectElement.focus(); return; } // Adicionado
-
-      const condicaoTempoSelecionada = document.querySelector('input[name="condicaoTempo"]:checked');
-      // ... (validação de condicaoTempoSelecionada)
-      const valorCondicaoTempo = condicaoTempoSelecionada.value;
-      const dadosDosBuracos = [];
-      // ... (loop para pegar dadosDosBuracos, como antes)
-      const entries = buracosContainerElement.getElementsByClassName('buraco-entry');
-      if (entries.length === 0) { adicionarNovoBuraco(); alert('Adicione as medidas para pelo menos um buraco.'); return; }
-      for (let i = 0; i < entries.length; i++) { /* ... sua lógica para popular dadosDosBuracos ... */
-        const entry = entries[i]; const idSuffix = entry.id.split('_')[1];
-        const larguraInput = entry.querySelector('#largura_' + idSuffix); const comprimentoInput = entry.querySelector('#comprimento_' + idSuffix); const espessuraInput = entry.querySelector('#espessura_' + idSuffix);
-        let larguraVal = larguraInput.value.trim(); let comprimentoVal = comprimentoInput.value.trim(); let espessuraVal = espessuraInput.value.trim();
-        if (larguraVal === '' || comprimentoVal === '' || espessuraVal === '' || isNaN(parseFloat(larguraVal.replace(',', '.'))) || isNaN(parseFloat(comprimentoVal.replace(',', '.'))) || isNaN(parseFloat(espessuraVal.replace(',', '.')))) {
-          alert(`Preencha todas as medidas válidas para o TAPA BURACO ${i + 1}.`); (larguraVal === '' || isNaN(parseFloat(larguraVal.replace(',', '.')))) ? larguraInput.focus() : (comprimentoVal === '' || isNaN(parseFloat(comprimentoVal.replace(',', '.')))) ? comprimentoInput.focus() : espessuraInput.focus(); return;
-        }
-        dadosDosBuracos.push({ identificador: `TAPA BURACO ${i + 1}`, largura: larguraVal, comprimento: comprimentoVal, espessura: espessuraVal });
-      }
-
-      const loggedInUser = localStorage.getItem('loggedInUser');
-      if (!loggedInUser) { /* ... seu alerta e redirecionamento para login ... */ alert("Sessão expirada. Faça login."); window.location.href = '/login.html'; return; }
-
-      statusSalvarElement.textContent = 'Preparando...'; statusSalvarElement.className = ''; loadingSpinnerElement.style.display = 'inline-block'; salvarTudoBtnElement.disabled = true;
-      const formData = new FormData();
-      formData.append('dados', JSON.stringify({
-        rua: ruaSelecionada,
-        bairro: bairroSelecionado, // Adicionado bairro
-        buracos: dadosDosBuracos,
-        condicaoTempo: valorCondicaoTempo,
-        username: loggedInUser
-      }));
-      const arquivosDeFoto = fotoGeralInputElement.files;
-      if (arquivosDeFoto.length > 0) { for (let i = 0; i < arquivosDeFoto.length; i++) { formData.append('fotos', arquivosDeFoto[i]); } }
-      statusSalvarElement.textContent = 'Salvando...';
-      fetch('/api/salvar', { method: 'POST', body: formData })
-        .then(response => { /* ... seu .then e .catch como antes ... */
-          const statusCode = response.status; const statusText = response.statusText;
-          return response.json().then(data => ({ ok: response.ok, status: statusCode, statusText: statusText, body: data }));
-        })
-        .then(resObj => {
-          loadingSpinnerElement.style.display = 'none'; salvarTudoBtnElement.disabled = false;
-          statusSalvarElement.textContent = resObj.body.message || resObj.body.error || 'Concluído.';
-          if (resObj.ok && resObj.body.message) { statusSalvarElement.className = 'success'; alert(resObj.body.message); limparFormularioAposSucesso(); }
-          else { statusSalvarElement.className = 'error'; console.error("Servidor:", resObj); }
-          setTimeout(() => { if (statusSalvarElement.textContent !== '') statusSalvarElement.textContent = ''; statusSalvarElement.className = ''; }, 7000);
-        })
-        .catch(erro => { /* ... seu .catch como antes ... */
-          console.error('Fetch /api/salvar:', erro); statusSalvarElement.textContent = 'Erro: ' + erro.message; statusSalvarElement.className = 'error';
-          loadingSpinnerElement.style.display = 'none'; salvarTudoBtnElement.disabled = false;
-          setTimeout(() => { if (statusSalvarElement.textContent.startsWith('Erro')) statusSalvarElement.textContent = ''; statusSalvarElement.className = ''; }, 7000);
-        });
-    });
-
-    // Registro do Service Worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(registration => { console.log('Service Worker (index.html): Registrado, escopo:', registration.scope); })
-          .catch(error => { console.error('Service Worker (index.html): Falha no registro:', error); });
-      });
-    }
-  </script>
+    <script src="/js/auth.js" defer></script>
+    <script src="/js/index.js" defer></script>
 </body>
-
 </html>

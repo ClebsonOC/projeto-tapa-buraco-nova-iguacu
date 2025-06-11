@@ -1,0 +1,80 @@
+/* public/css/index.css */
+
+/* --- LAYOUT E CONTAINER --- */
+.container {
+    max-width: 800px;
+    margin: 30px auto;
+    background-color: var(--fundo-container);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: var(--sombra-suave);
+    box-sizing: border-box;
+}
+@media (max-width: 768px) { .container { padding: 20px; margin-top: 20px; } }
+
+/* --- TÍTULOS E SEÇÕES --- */
+h1, h2 { color: var(--texto-titulo); text-align: center; }
+h1 { margin-bottom: 30px; font-size: 2em; font-weight: 700; }
+h2 { font-size: 1.5em; font-weight: 600; margin-top: 40px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--borda-cor); }
+
+/* --- FORMULÁRIOS E INPUTS --- */
+label { display: block; margin-top: 15px; margin-bottom: 8px; font-weight: 600; font-size: 0.9em; color: var(--texto-label); text-transform: uppercase; }
+input[type="text"], input[type="file"], select {
+    width: 100%; padding: 12px 15px; border: 1px solid var(--borda-cor); border-radius: 8px; box-sizing: border-box; font-size: 1rem; background-color: #fcfdff; transition: border-color 0.2s, box-shadow 0.2s;
+}
+input[type="text"]:focus, select:focus {
+    outline: none; border-color: var(--cor-primaria); box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+.form-row { display: flex; flex-wrap: wrap; gap: 25px; }
+.form-column { flex: 1; min-width: 250px; }
+
+/* --- SUGESTÕES DE AUTOCOMPLETE (VISUAL PROFISSIONAL) --- */
+#sugestoes {
+    border: 1px solid var(--borda-cor);
+    border-top: none;
+    max-height: 210px;
+    overflow-y: auto;
+    margin-top: -8px; /* Encosta no input */
+    padding: 5px 0;
+    background-color: var(--fundo-container);
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 900;
+}
+.sugestao-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+.sugestao-item:hover { background-color: #f4f7f6; }
+.sugestao-item.active { background-color: var(--cor-primaria); color: white; } /* Para navegação com teclado */
+
+/* --- BOTÕES DE RÁDIO CUSTOMIZADOS --- */
+.tempo-container { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-top: 10px; }
+.tempo-container input[type="radio"] { display: none; }
+.tempo-container label {
+    padding: 12px 25px; border: 2px solid var(--borda-cor); border-radius: 50px; cursor: pointer; transition: all 0.2s ease-in-out; font-weight: 600;
+}
+.tempo-container label:hover { border-color: var(--cor-primaria); }
+.tempo-container input[type="radio"]:checked + label {
+    background-color: var(--cor-primaria); color: white; border-color: var(--cor-primaria);
+}
+
+/* --- BOTÕES DE AÇÃO --- */
+button {
+    background-color: var(--cor-primaria); color: white; padding: 12px 22px; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; font-weight: 600; margin: 10px 5px 0 5px; transition: background-color 0.2s, transform 0.1s;
+}
+button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+#addBuracoBtn { background-color: var(--cor-info); }
+#salvarTudoBtn { background-color: var(--cor-sucesso); font-size: 1.1em; }
+.remove-buraco-btn { background-color: var(--cor-perigo); font-size: 0.8em; padding: 8px 12px; margin: 0; }
+
+/* --- OUTROS --- */
+.buraco-entry { border: 1px solid var(--borda-cor); padding: 20px; margin-top: 15px; border-radius: 8px; background-color: #fdfdfd; }
+#statusSalvar { margin-top: 20px; font-weight: bold; text-align: center; padding: 12px; border-radius: 6px; }
+#statusSalvar.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+#statusSalvar.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.spinner { border: 4px solid rgba(0,0,0,0.1); width: 24px; height: 24px; border-radius: 50%; border-left-color: #007bff; animation: spin 1s ease infinite; display: none; margin: 10px auto; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
