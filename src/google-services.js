@@ -1,179 +1,127 @@
-// src/google-services.js
 const { google } = require("googleapis");
 const fs = require("fs");
 const path = require("path");
 const config = require("./config");
-const { removerAcentos } = require("./utils");
+// A linha duplicada 'const { removerAcentos }...' foi removida pois não era usada aqui.
+// As linhas duplicadas 'const fs' e 'const path' foram removidas.
 
 // --- SEÇÃO DE AUTENTICAÇÃO E INICIALIZAÇÃO ---
-let authConfig;
-const scopes = [
-  "https://www.googleapis.com/auth/drive",
-  "https://www.googleapis.com/auth/spreadsheets",
-];
-
-if (
-  process.env.GOOGLE_APPLICATION_CREDENTIALS &&
-  fs.existsSync(process.env.GOOGLE_APPLICATION_CREDENTIALS)
-) {
-  authConfig = { keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS, scopes };
-  console.log(
-    "Autenticação Google configurada via GOOGLE_APPLICATION_CREDENTIALS."
-  );
-} else if (fs.existsSync("credentials.json")) {
-  authConfig = { keyFile: "credentials.json", scopes };
-  console.log(
-    "Autenticação Google configurada via arquivo credentials.json local."
-  );
-} else {
-  console.error(
-    "ERRO CRÍTICO: Arquivo de credenciais do Google não encontrado."
-  );
-  authConfig = { scopes };
-}
-
-const auth = new google.auth.GoogleAuth(authConfig);
+const auth = new google.auth.GoogleAuth({
+    keyFile: "serviceAccountKey.json",
+    scopes: ["https://www.googleapis.com/auth/drive"],
+});
 const drive = google.drive({ version: "v3", auth });
-const sheets = google.sheets({ version: "v4", auth });
 
-// --- SEÇÃO DE SERVIÇOS DO GOOGLE DRIVE ---
 
-// Função interna para criar pastas
+// --- SEÇÃO DE SERVIÇOS DO GOOGLE DRIVE (Sem alterações) ---
 async function getOrCreateFolder(name, parentId) {
-  if (!parentId)
-    throw new Error("ID da pasta pai não fornecido para getOrCreateFolder.");
-  const sanitizedName = name.trim().replace(/[\\/?%*:|"<>]/g, "_");
-  const res = await drive.files.list({
-    q: `'${parentId}' in parents and name='${sanitizedName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
-    fields: "files(id, name)",
-  });
-  if (res.data.files.length > 0) return res.data.files[0].id;
-  const fileMetadata = {
-    name: sanitizedName,
-    mimeType: "application/vnd.google-apps.folder",
-    parents: [parentId],
-  };
-  const file = await drive.files.create({
-    resource: fileMetadata,
-    fields: "id",
-  });
-  return file.data.id;
-}
-
-// Função pública para upload
-async function uploadFiles(files, rua, dataHoje) {
-  if (!files || files.length === 0) return [];
-  if (!config.FOLDER_ID)
-    throw new Error("Configuração FOLDER_ID ausente no servidor.");
-
-  const linksFotos = [];
-  const nomesArquivosSalvosNaPasta = new Set();
-  const pastaRuaId = await getOrCreateFolder(rua, config.FOLDER_ID);
-  const nomePastaData = dataHoje
-    .toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })
-    .replace(/\//g, ".");
-  const pastaDataId = await getOrCreateFolder(nomePastaData, pastaRuaId);
-
-  for (const file of files) {
-    let nomeArquivoFinal = file.originalname.replace(/[^\w\s\.\-]/gi, "_");
-    let contador = 1;
-    while (nomesArquivosSalvosNaPasta.has(nomeArquivoFinal)) {
-      const nomeBase = path.parse(file.originalname).name;
-      const extensao = path.parse(file.originalname).ext;
-      nomeArquivoFinal = `${nomeBase}_${contador++}${extensao}`;
-    }
-    const fileMetadata = { name: nomeArquivoFinal, parents: [pastaDataId] };
-    const media = {
-      mimeType: file.mimetype,
-      body: fs.createReadStream(file.path),
-    };
-    const uploadedFile = await drive.files.create({
-      resource: fileMetadata,
-      media,
-      fields: "id, webViewLink, name",
+    if (!parentId) throw new Error("ID da pasta pai não fornecido para getOrCreateFolder.");
+    const sanitizedName = name.trim().replace(/[\\/?%*:|"<>]/g, "_");
+    const res = await drive.files.list({
+        q: `'${parentId}' in parents and name='${sanitizedName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+        fields: "files(id, name)",
     });
-    linksFotos.push(uploadedFile.data.webViewLink);
-    nomesArquivosSalvosNaPasta.add(uploadedFile.data.name);
-    fs.unlinkSync(file.path);
-  }
-  console.log(`${linksFotos.length} fotos salvas com sucesso.`);
-  return linksFotos;
+    if (res.data.files.length > 0) return res.data.files[0].id;
+    const fileMetadata = { name: sanitizedName, mimeType: "application/vnd.google-apps.folder", parents: [parentId] };
+    const file = await drive.files.create({ resource: fileMetadata, fields: "id" });
+    return file.data.id;
+}
+async function uploadFiles(files, rua, dataHoje) {
+    if (!files || files.length === 0) return [];
+    if (!config.FOLDER_ID) throw new Error("Configuração FOLDER_ID ausente no servidor.");
+    const linksFotos = [];
+    const nomesArquivosSalvosNaPasta = new Set();
+    const pastaRuaId = await getOrCreateFolder(rua, config.FOLDER_ID);
+    const nomePastaData = dataHoje.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }).replace(/\//g, ".");
+    const pastaDataId = await getOrCreateFolder(nomePastaData, pastaRuaId);
+    for (const file of files) {
+        let nomeArquivoFinal = file.originalname.replace(/[^\w\s\.\-]/gi, "_");
+        let contador = 1;
+        while (nomesArquivosSalvosNaPasta.has(nomeArquivoFinal)) {
+            const nomeBase = path.parse(file.originalname).name;
+            const extensao = path.parse(file.originalname).ext;
+            nomeArquivoFinal = `${nomeBase}_${contador++}${extensao}`;
+        }
+        const fileMetadata = { name: nomeArquivoFinal, parents: [pastaDataId] };
+        const media = { mimeType: file.mimetype, body: fs.createReadStream(file.path) };
+        const uploadedFile = await drive.files.create({ resource: fileMetadata, media, fields: "id, webViewLink, name" });
+        linksFotos.push(uploadedFile.data.webViewLink);
+        nomesArquivosSalvosNaPasta.add(uploadedFile.data.name);
+        fs.unlinkSync(file.path);
+    }
+    console.log(`${linksFotos.length} fotos salvas com sucesso.`);
+    return linksFotos;
 }
 
-// --- SEÇÃO DE SERVIÇOS DO GOOGLE SHEETS ---
-let cacheRuas = null,
-  timestampCacheRuas = 0;
-let cacheBairros = null,
-  timestampCacheBairros = 0;
+
+// --- SEÇÃO DE LEITURA DE DADOS (LOCAL) ---
+let cacheRuas = null;
+let cacheBairros = null;
 
 async function getRuasNovaIguacuComCache() {
-  const agora = Date.now();
-  if (cacheRuas && agora - timestampCacheRuas < config.CACHE_EXPIRATION_RUAS_MS)
-    return cacheRuas;
-  // ... restante da lógica de busca e cache de ruas ...
-  if (!config.RUAS_MUNICIPIOS_SHEET_ID) {
-    console.error("ERRO: RUAS_MUNICIPIOS_SHEET_ID não definido.");
-    return [];
-  }
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: config.RUAS_MUNICIPIOS_SHEET_ID,
-    range: `'${config.NOME_ABA_DADOS_RUAS}'!A:Z`,
-  });
-  const rows = res.data.values;
-  if (!rows || rows.length < 2) return [];
-  const cabecalho = rows[0].map(String);
-  const idxMunicipio = cabecalho.indexOf(config.COLUNA_MUNICIPIO_DADOS_RUAS);
-  const idxRua = cabecalho.indexOf(config.COLUNA_RUA_DADOS_RUAS);
-  if (idxMunicipio === -1 || idxRua === -1) return [];
+    if (cacheRuas) {
+        return cacheRuas;
+    }
+    try {
+        const filePath = path.join(__dirname, '..', 'data', 'Ruas.tsv');
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+        const lines = fileContent.split('\n');
+        const header = lines[0].split('\t').map(h => h.trim());
+        const idxRua = header.indexOf("Rua");
+        const idxMunicipio = header.indexOf("Municipio");
 
-  const ruas = rows
-    .slice(1)
-    .filter(
-      (row) =>
-        row[idxMunicipio] &&
-        row[idxMunicipio].toString().trim() ===
-          config.MUNICIPIO_FILTRO_DADOS_RUAS
-    )
-    .map((row) => (row[idxRua] ? row[idxRua].toString().trim() : null))
-    .filter((rua) => rua);
+        if (idxRua === -1 || idxMunicipio === -1) {
+            console.error("Cabeçalho 'Rua' ou 'Municipio' não encontrado em Ruas.tsv");
+            return [];
+        }
+        
+        const todasRuasNI = lines.slice(1).map(line => {
+            const columns = line.split('\t');
+            if (columns[idxMunicipio] && columns[idxMunicipio].trim() === "Nova Iguaçu") {
+                return columns[idxRua] ? columns[idxRua].trim() : null;
+            }
+            return null;
+        }).filter(rua => rua);
 
-  cacheRuas = [...new Set(ruas)];
-  timestampCacheRuas = Date.now();
-  console.log(`${cacheRuas.length} ruas de NI salvas no cache.`);
-  return cacheRuas;
+        cacheRuas = [...new Set(todasRuasNI)];
+        console.log(`${cacheRuas.length} ruas de NI carregadas do arquivo local Ruas.tsv.`);
+        return cacheRuas;
+    } catch (error) {
+        console.error("Erro ao ler ou processar o arquivo Ruas.tsv:", error);
+        cacheRuas = [];
+        return [];
+    }
 }
 
 async function getBairrosNovaIguacuComCache() {
-  const agora = Date.now();
-  if (
-    cacheBairros &&
-    agora - timestampCacheBairros < config.CACHE_EXPIRATION_BAIRROS_MS
-  )
-    return cacheBairros;
-  // ... restante da lógica de busca e cache de bairros ...
-  if (!config.RUAS_MUNICIPIOS_SHEET_ID) {
-    console.error("ERRO: RUAS_MUNICIPIOS_SHEET_ID não definido.");
-    return [];
-  }
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: config.RUAS_MUNICIPIOS_SHEET_ID,
-    range: `'${config.NOME_ABA_DADOS_BAIRROS}'!A:Z`,
-  });
-  const rows = res.data.values;
-  if (!rows || rows.length < 2) return [];
-  const cabecalho = rows[0].map(String);
-  const idxBairro = cabecalho.indexOf(config.COLUNA_BAIRRO_DADOS);
-  if (idxBairro === -1) return [];
+    if (cacheBairros) {
+        return cacheBairros;
+    }
+    try {
+        const filePath = path.join(__dirname, '..', 'data', 'Bairros.tsv');
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+        const lines = fileContent.split('\n');
+        const header = lines[0].split('\t').map(h => h.trim());
+        const idxBairro = header.indexOf("Bairro");
 
-  const bairros = rows
-    .slice(1)
-    .map((row) => (row[idxBairro] ? row[idxBairro].toString().trim() : null))
-    .filter((bairro) => bairro);
+        if (idxBairro === -1) {
+            console.error("Cabeçalho 'Bairro' não encontrado em Bairros.tsv");
+            return [];
+        }
 
-  cacheBairros = [...new Set(bairros)].sort();
-  timestampCacheBairros = Date.now();
-  console.log(`${cacheBairros.length} bairros de NI salvos no cache.`);
-  return cacheBairros;
+        const todosBairrosNI = lines.slice(1).map(line => {
+            const columns = line.split('\t');
+            return columns[idxBairro] ? columns[idxBairro].trim() : null;
+        }).filter(bairro => bairro);
+
+        cacheBairros = [...new Set(todosBairrosNI)].sort();
+        console.log(`${cacheBairros.length} bairros de NI carregados do arquivo local Bairros.tsv.`);
+        return cacheBairros;
+    } catch (error) {
+        console.error("Erro ao ler ou processar o arquivo Bairros.tsv:", error);
+        cacheBairros = [];
+        return [];
+    }
 }
 
 // Exporta as funções públicas
