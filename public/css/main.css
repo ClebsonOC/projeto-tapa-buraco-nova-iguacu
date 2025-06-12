@@ -112,3 +112,4 @@ body {
     .nav-toggle { display: block; }
     .user-info span { display: none; }
 }
+.nav-brand img { height: 60px; /* Ajuste a altura conforme necessário */ vertical-align: middle; /* Alinha verticalmente com outros elementos da navegação */ }

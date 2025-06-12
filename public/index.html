@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tapa Buracos - Novo Registro</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#007bff">
-    
+
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/index.css">
 </head>
+
 <body>
     <nav class="main-nav">
-        <a href="/index.html" class="nav-brand">TapaBuracosNI</a>
+        <a href="/index.html" class="nav-brand"><img src="/images/logo.png" alt="Logo Lytorânea Construtora"></a>
         <div class="nav-links">
             <a href="/index.html" class="active">Novo Registro</a>
             <a href="/relatorio.html">Relatórios</a>
@@ -49,7 +51,7 @@
         <div class="tempo-container">
             <input type="radio" id="tempoBom" name="condicaoTempo" value="Bom" checked>
             <label for="tempoBom">Bom</label>
-            
+
             <input type="radio" id="tempoNublado" name="condicaoTempo" value="Nublado">
             <label for="tempoNublado">Nublado</label>
 
@@ -66,8 +68,17 @@
         </div>
         <div id="statusSalvar"></div>
     </div>
-
+    <div id="success-overlay" class="success-overlay">
+        <div class="success-content">
+            <div class="success-checkmark">
+                <div class="checkmark-stem"></div>
+                <div class="checkmark-kick"></div>
+            </div>
+            <p>Salvo com Sucesso!</p>
+        </div>
+    </div>
     <script src="/js/auth.js" defer></script>
     <script src="/js/index.js" defer></script>
 </body>
+
 </html>

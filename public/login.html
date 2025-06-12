@@ -12,7 +12,7 @@
     
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png"> 
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="TapaBuracosNI">
 
     <style>
@@ -34,7 +34,14 @@
             text-align: center; box-sizing: border-box;
         }
         .login-header { margin-bottom: 30px; }
-        .login-header img { max-width: 100px; margin-bottom: 15px; }
+
+        /* --- CÓDIGO CSS ADICIONADO PARA A LOGO --- */
+        .login-header .login-logo {
+            max-width: 150px; /* Você pode ajustar o tamanho da logo aqui */
+            margin-bottom: 20px;
+        }
+        /* --- FIM DO CÓDIGO CSS ADICIONADO --- */
+
         .login-header h1 { margin: 0; font-size: 1.8rem; color: var(--text-color); font-weight: 600; }
         .form-group { margin-bottom: 20px; text-align: left; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem; color: #495057;}
@@ -64,6 +71,7 @@
 <body>
     <div class="login-container">
         <div class="login-header">
+            <img src="/images/logo.png" alt="Logo da Empresa" class="login-logo">
             <h1>Acesso ao Sistema</h1>
         </div>
         <form id="loginForm">

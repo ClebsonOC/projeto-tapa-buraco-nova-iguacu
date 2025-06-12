@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +8,10 @@
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/relatorio.css">
 </head>
+
 <body>
     <nav class="main-nav">
-        <a href="/index.html" class="nav-brand">TapaBuracosNI</a>
+        <a href="/index.html" class="nav-brand"><img src="/images/logo.png" alt="Logo Lytorânea Construtora"></a>
         <div class="nav-links">
             <a href="/index.html">Novo Registro</a>
             <a href="/relatorio.html" class="active">Relatórios</a>
@@ -20,10 +22,10 @@
         </div>
         <button class="nav-toggle" aria-label="Abrir menu">☰</button>
     </nav>
-    
+
     <div class="container">
         <h1>Relatório de Registros</h1>
-        
+
         <div class="filter-bar">
             <div class="filter-group">
                 <label for="filtro-rua">Pesquisar por Rua:</label>
@@ -44,11 +46,12 @@
                 </tr>
             </thead>
             <tbody id="report-table-body">
-                </tbody>
+            </tbody>
         </table>
     </div>
 
     <script src="/js/auth.js" defer></script>
     <script src="/js/relatorio.js" defer></script>
 </body>
+
 </html>
