@@ -71,7 +71,6 @@ router.post("/salvar", upload.array("fotos"), async (req, res) => {
                 fotosDriveLinks: linksDasFotosNoDrive,
                 registradoPor: username,
                 registradoEm: dataHoje,
-                // Linha 'status' foi removida
             };
             const novoBuracoRef = firestore.collection("buracos").doc();
             batch.set(novoBuracoRef, dadosParaFirestore);
@@ -83,20 +82,16 @@ router.post("/salvar", upload.array("fotos"), async (req, res) => {
     }
 });
 
-// --- ROTAS DE LEITURA, ATUALIZAÇÃO E DELEÇÃO (READ, UPDATE, DELETE) ---
+// --- ROTAS DE LEITURA, ATUALIZAÇÃO E DELEÇÃO ---
 
 // LER (Read): Busca buracos com filtros
 router.get("/buracos", async (req, res) => {
     try {
-        const { usuario, rua } = req.query; // Filtro de status removido
+        const { usuario, rua } = req.query;
         let query = firestore.collection('buracos');
 
-        if (usuario) {
-            query = query.where('registradoPor', '==', usuario);
-        }
-        if (rua) {
-            query = query.where('rua', '>=', rua.toUpperCase()).where('rua', '<=', rua.toUpperCase() + '\uf8ff');
-        }
+        if (usuario) query = query.where('registradoPor', '==', usuario);
+        if (rua) query = query.where('rua', '>=', rua.toUpperCase()).where('rua', '<=', rua.toUpperCase() + '\uf8ff');
 
         const snapshot = await query.orderBy('registradoEm', 'desc').get();
         
@@ -115,8 +110,6 @@ router.get("/buracos", async (req, res) => {
     }
 });
 
-// ROTA DE ATUALIZAR STATUS FOI REMOVIDA
-
 // ATUALIZAR DIMENSÕES (Update): Altera as dimensões de um ÚNICO buraco.
 router.patch("/buracos/dimensoes/:docId", async (req, res) => {
     try {
@@ -125,6 +118,21 @@ router.patch("/buracos/dimensoes/:docId", async (req, res) => {
         if (!docId || !dimensoes) return res.status(400).json({ error: "ID do documento e dimensões são obrigatórios." });
 
         const buracoRef = firestore.collection('buracos').doc(docId);
+        const doc = await buracoRef.get();
+
+        if (!doc.exists) {
+            return res.status(404).json({ error: "Registro não encontrado." });
+        }
+
+        const dataRegistro = doc.data().registradoEm.toDate();
+        const hoje = new Date();
+        dataRegistro.setHours(0, 0, 0, 0);
+        hoje.setHours(0, 0, 0, 0);
+
+        if (dataRegistro.getTime() < hoje.getTime()) {
+            return res.status(403).json({ error: "Ação não permitida. Registros só podem ser alterados no mesmo dia da criação." });
+        }
+
         await buracoRef.update({ dimensoes });
         res.status(200).json({ message: `Dimensões do registro ${docId} atualizadas.` });
     } catch (error) {
@@ -138,10 +146,24 @@ router.delete("/buracos/submission/:submissionId", async (req, res) => {
         const { submissionId } = req.params;
         if (!submissionId) return res.status(400).json({ error: "ID da submissão é obrigatório." });
 
-        const batch = firestore.batch();
-        const snapshot = await firestore.collection('buracos').where('submissionId', '==', submissionId).get();
+        const snapshot = await firestore.collection('buracos').where('submissionId', '==', submissionId).limit(1).get();
+        if (snapshot.empty) {
+            return res.status(404).json({ error: "Visita não encontrada." });
+        }
 
-        snapshot.docs.forEach(doc => {
+        const primeiroDoc = snapshot.docs[0];
+        const dataRegistro = primeiroDoc.data().registradoEm.toDate();
+        const hoje = new Date();
+        dataRegistro.setHours(0, 0, 0, 0);
+        hoje.setHours(0, 0, 0, 0);
+
+        if (dataRegistro.getTime() < hoje.getTime()) {
+            return res.status(403).json({ error: "Ação não permitida. A visita só pode ser deletada no mesmo dia da criação." });
+        }
+
+        const todosDocsDaVisita = await firestore.collection('buracos').where('submissionId', '==', submissionId).get();
+        const batch = firestore.batch();
+        todosDocsDaVisita.docs.forEach(doc => {
             batch.delete(doc.ref);
         });
         

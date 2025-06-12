@@ -47,7 +47,17 @@ function carregarDados() {
                 const firstItem = group[0];
                 const dataFormatada = new Date(firstItem.registradoEm._seconds * 1000).toLocaleString('pt-BR');
                 
+                const dataRegistro = new Date(firstItem.registradoEm._seconds * 1000);
+                const hoje = new Date();
+                const isEditable = dataRegistro.getFullYear() === hoje.getFullYear() &&
+                                   dataRegistro.getMonth() === hoje.getMonth() &&
+                                   dataRegistro.getDate() === hoje.getDate();
+                
                 const mainRow = document.createElement('tr');
+                const acaoDeletarHtml = isEditable ?
+                    `<button class="btn-delete" onclick="deletarVisita('${submissionId}')">Deletar Visita</button>` :
+                    `<span class="acao-bloqueada">Bloqueado</span>`;
+
                 mainRow.innerHTML = `
                     <td><button class="expand-btn" onclick="toggleDetails(this, 'details-${submissionId}')">+</button></td>
                     <td>${dataFormatada}</td>
@@ -55,7 +65,7 @@ function carregarDados() {
                     <td>${firstItem.bairro}</td>
                     <td>${firstItem.registradoPor}</td>
                     <td class="actions">
-                        <button class="btn-delete" onclick="deletarVisita('${submissionId}')">Deletar Visita</button>
+                        ${acaoDeletarHtml}
                     </td>
                 `;
                 tableBody.appendChild(mainRow);
@@ -68,10 +78,14 @@ function carregarDados() {
                 group.sort((a,b) => (a.identificadorBuraco > b.identificadorBuraco) ? 1 : -1)
                      .forEach(buraco => {
                     const dim = buraco.dimensoes;
+                    const acaoEditarHtml = isEditable ?
+                        `<button class="btn-update" style="padding: 4px 8px; font-size: 0.8em;" onclick="editarBuraco('${buraco.id}', '${dim.largura}', '${dim.comprimento}', '${dim.espessura}')">Editar</button>` :
+                        '';
+
                     detailsHtml += `
                         <p style="display:flex; justify-content:space-between; align-items:center;">
                             <span><strong>${buraco.identificadorBuraco}:</strong> L: ${dim.largura}m, C: ${dim.comprimento}m, E: ${dim.espessura}cm</span>
-                            <button class="btn-update" style="padding: 4px 8px; font-size: 0.8em;" onclick="editarBuraco('${buraco.id}', '${dim.largura}', '${dim.comprimento}', '${dim.espessura}')">Editar</button>
+                            ${acaoEditarHtml}
                         </p>
                     `;
                 });
