@@ -11,11 +11,12 @@ const URLS_TO_CACHE = [
   '/css/relatorio.css',
   '/js/auth.js',
   '/js/index.js',
-  '/js/relatorio.js'
+  '/js/relatorio.js',
   // Os ícones foram removidos por enquanto.
   // Se você os adicionar na pasta /public/icons, pode descomentar as linhas abaixo.
-  // '/icons/icon-192x192.png',
-  // '/icons/icon-512x512.png'
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
+  '/icons/icon-144x144.png'
 ];
 
 // Evento de Instalação: Cacheia os arquivos do App Shell
