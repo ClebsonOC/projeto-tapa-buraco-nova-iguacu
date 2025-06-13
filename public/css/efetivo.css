@@ -1,0 +1,302 @@
+/* public/css/efetivo.css */
+
+/* --- CONTAINER E TÍTULOS (CORREÇÃO ADICIONADA) --- */
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    background-color: var(--fundo-container, #fff);
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: var(--sombra-suave, 0 4px 15px rgba(0,0,0,0.07));
+}
+
+h1, h2 {
+    text-align: center;
+    color: var(--texto-titulo, #2c3e50);
+}
+
+h1 {
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 1.5em;
+    font-weight: 600;
+    margin-top: 40px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--borda-cor, #dee2e6);
+}
+
+/* --- ESTILOS EXISTENTES (MANTIDOS) --- */
+
+#data-hoje {
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: 500;
+    color: var(--texto-cor-claro, #7f8c8d);
+    margin-top: 0;
+    margin-bottom: 30px;
+}
+
+#efetivo-form {
+    background-color: var(--fundo-claro, #f8f9fa);
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid var(--borda-cor, #dee2e6);
+}
+
+.efetivo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.item-group {
+    display: flex;
+    align-items: center;
+    background-color: var(--fundo-container, #fff);
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid var(--borda-cor, #dee2e6);
+    transition: border-color 0.2s;
+}
+
+.item-group:hover {
+    border-color: var(--cor-primaria, #3498db);
+}
+
+.item-group input[type="checkbox"] {
+    width: 1.3em;
+    height: 1.3em;
+    margin-right: 12px;
+}
+
+.item-group label {
+    font-weight: 500;
+    color: var(--texto-corpo, #34495e);
+}
+
+.observacao-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    color: var(--texto-label, #7f8c8d);
+}
+
+.observacao-group textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px;
+    font-size: 1em;
+    border-radius: 6px;
+    border: 1px solid var(--borda-cor, #dee2e6);
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.actions {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#salvar-btn {
+    background-color: var(--cor-sucesso, #2ecc71);
+    padding: 12px 30px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+#salvar-btn:hover {
+    background-color: #27ae60;
+    transform: translateY(-2px);
+}
+
+.separator {
+    border: 0;
+    border-top: 1px solid var(--borda-cor, #dee2e6);
+    margin: 50px 0;
+}
+
+/* Estilos para a tabela de histórico */
+#loading-historico {
+    text-align: center;
+    padding: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid var(--borda-cor, #dee2e6);
+    text-align: left;
+}
+
+thead th {
+    background-color: var(--fundo-claro, #f8f9fa);
+    font-weight: 600;
+}
+
+/* --- BOTÕES E DETALHES EXPANSÍVEIS --- */
+.expand-btn {
+    background-color: var(--cor-primaria, #3498db);
+    font-weight: bold;
+    font-size: 1.1em;
+    width: 30px;
+    height: 30px;
+    line-height: 28px;
+    text-align: center;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.expand-btn:hover {
+    background-color: var(--cor-primaria-hover, #2980b9);
+}
+
+.details-row {
+    display: none; /* Começa escondida */
+}
+.details-row.show {
+    display: table-row; /* Mostra a linha */
+}
+.details-content {
+    background-color: #f0f2f5;
+    padding: 20px;
+    border-left: 4px solid var(--cor-info, #5dade2);
+}
+.details-content strong {
+    color: var(--texto-titulo, #2c3e50);
+}
+/* --- ESTILOS DO POPUP DE SUCESSO --- */
+.success-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.success-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.success-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 50%;
+    width: 160px;
+    height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+}
+
+.success-overlay.active .success-content {
+    transform: scale(1);
+}
+
+.success-content p {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--texto-titulo);
+    margin-top: 15px;
+    margin-bottom: 0;
+    text-align: center;
+}
+
+/* --- ÍCONE DE CHECK FEITO COM CSS --- */
+.success-checkmark {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 2;
+    stroke: #fff;
+    stroke-miterlimit: 10;
+    margin: 0 auto;
+    box-shadow: inset 0px 0px 0px var(--cor-sucesso, #2ecc71);
+    animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+}
+
+.checkmark-stem {
+    top: 50%;
+    left: calc(50% - 2px);
+    width: 4px;
+    height: 20px;
+    background: var(--cor-sucesso, #2ecc71);
+    position: absolute;
+    transform-origin: 50% 100%;
+    transform: translateY(-10px) rotate(45deg);
+}
+
+.checkmark-kick {
+    top: 50%;
+    left: calc(50% - 2px);
+    width: 4px;
+    height: 40px;
+    background: var(--cor-sucesso, #2ecc71);
+    position: absolute;
+    transform-origin: 50% 0;
+    transform: translateY(-20px) rotate(-45deg);
+}
+
+.success-checkmark div {
+    height: 5px;
+    background: #fff;
+    display: block;
+    border-radius: 5px;
+    position: absolute;
+    z-index: 10;
+}
+
+.success-checkmark .checkmark-stem {
+    width: 5px;
+    height: 25px;
+    transform: rotate(45deg);
+    top: 46px;
+    left: 38px;
+}
+
+.success-checkmark .checkmark-kick {
+    width: 45px;
+    transform: rotate(-45deg);
+    top: 38px;
+    left: 8px;
+}
+
+@keyframes scale {
+    0%, 100% { transform: none; }
+    50% { transform: scale3d(1.1, 1.1, 1); }
+}
+
+@keyframes fill {
+    100% { box-shadow: inset 0px 0px 0px 80px var(--cor-sucesso, #2ecc71); }
+}

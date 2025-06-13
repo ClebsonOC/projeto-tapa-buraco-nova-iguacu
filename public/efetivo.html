@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Efetivo Diário</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/efetivo.css">
+</head>
+<body>
+    <nav class="main-nav">
+        <a href="/index.html" class="nav-brand"><img src="/images/logo.png" alt="Logo da Empresa"></a>
+        <div class="nav-links">
+            <a href="/index.html">Novo Registro</a>
+            <a href="/relatorio.html">Relatórios</a>
+            <a href="/efetivo.html" class="active">Efetivo</a>
+        </div>
+        <div class="user-info">
+            <span>Logado como:&nbsp;</span><strong id="user-display-name"></strong>
+            <button id="logoutBtn">Sair</button>
+        </div>
+        <button class="nav-toggle" aria-label="Abrir menu">☰</button>
+    </nav>
+
+    <div class="container">
+        <h1>Efetivo Diário</h1>
+        <p id="data-hoje"></p>
+
+        <form id="efetivo-form">
+            <div class="efetivo-grid">
+                </div>
+            <div class="observacao-group">
+                <label for="observacao">Observações:</label>
+                <textarea id="observacao" rows="4"></textarea>
+            </div>
+            <div class="actions">
+                <button type="submit" id="salvar-btn">Salvar Efetivo de Hoje</button>
+            </div>
+            <input type="hidden" id="efetivo-hoje-id">
+        </form>
+
+        <hr class="separator">
+
+        <h2>Histórico de Registros</h2>
+        <div id="loading-historico">Carregando histórico...</div>
+        <table>
+            <thead>
+                <tr>
+                    <th></th> <th>Data</th>
+                    <th>Itens Presentes</th>
+                </tr>
+            </thead>
+            <tbody id="historico-table-body">
+                </tbody>
+        </table>
+        </table>
+    </div>
+    <div id="success-overlay" class="success-overlay">
+        <div class="success-content">
+            <div class="success-checkmark">
+                <div class="checkmark-stem"></div>
+                <div class="checkmark-kick"></div>
+            </div>
+            <p>Salvo com Sucesso!</p>
+        </div>
+    </div>
+    <script src="/js/auth.js" defer></script>
+    <script src="/js/efetivo.js" defer></script>
+</body>
+</html>

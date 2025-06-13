@@ -173,5 +173,90 @@ router.delete("/buracos/submission/:submissionId", async (req, res) => {
         res.status(500).json({ error: "Não foi possível deletar a visita." });
     }
 });
+router.post("/efetivo", async (req, res) => {
+    try {
+        const { registradoPor, itensPresentes, observacao } = req.body;
+        if (!registradoPor || !itensPresentes) {
+            return res.status(400).json({ error: "Usuário e lista de presentes são obrigatórios." });
+        }
+
+        // --- LÓGICA DE DATA REFINADA ---
+        const inicioDoDia = new Date();
+        inicioDoDia.setHours(0, 0, 0, 0);
+        const fimDoDia = new Date();
+        fimDoDia.setHours(23, 59, 59, 999);
+        // --- FIM DA LÓGICA DE DATA REFINADA ---
+
+        const snapshot = await firestore.collection('efetivo')
+            .where('registradoPor', '==', registradoPor)
+            .where('registradoEm', '>=', inicioDoDia)
+            .where('registradoEm', '<=', fimDoDia)
+            .get();
+
+        if (!snapshot.empty) {
+            return res.status(409).json({ error: "Já existe um registro de efetivo para este usuário hoje." });
+        }
+        
+        const novoEfetivo = {
+            registradoPor,
+            registradoEm: new Date(),
+            itensPresentes,
+            observacao: observacao || ""
+        };
+        await firestore.collection('efetivo').add(novoEfetivo);
+        res.status(201).json({ message: "Efetivo salvo com sucesso!" });
+
+    } catch (error) {
+        // --- LOG DE ERRO MELHORADO ---
+        console.error("ERRO DETALHADO NO POST /api/efetivo:", error);
+        res.status(500).json({ error: "Erro interno no servidor ao salvar o efetivo.", details: error.message });
+    }
+});
+
+// LER (Read): Busca o histórico de efetivos de um usuário.
+router.get("/efetivo", async (req, res) => {
+    try {
+        const { usuario } = req.query;
+        if (!usuario) return res.status(400).json({ error: "Nome de usuário é obrigatório." });
+
+        const snapshot = await firestore.collection('efetivo')
+            .where('registradoPor', '==', usuario)
+            .orderBy('registradoEm', 'desc')
+            .get();
+
+        const historico = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        res.status(200).json(historico);
+    } catch (error) {
+        console.error("ERRO DETALHADO NO GET /api/efetivo:", error);
+        res.status(500).json({ error: "Erro ao buscar histórico de efetivo.", details: error.message });
+    }
+});
+
+// ATUALIZAR (Update): Atualiza um registro de efetivo existente.
+router.patch("/efetivo/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { itensPresentes, observacao } = req.body;
+
+        const docRef = firestore.collection('efetivo').doc(id);
+        const doc = await docRef.get();
+        if (!doc.exists) return res.status(404).json({ error: "Registro não encontrado." });
+
+        const dataRegistro = doc.data().registradoEm.toDate();
+        const hoje = new Date();
+        dataRegistro.setHours(0, 0, 0, 0);
+        hoje.setHours(0, 0, 0, 0);
+        if (dataRegistro.getTime() < hoje.getTime()) {
+            return res.status(403).json({ error: "Não é possível alterar registros de dias anteriores." });
+        }
+
+        await docRef.update({ itensPresentes, observacao });
+        res.status(200).json({ message: "Efetivo atualizado com sucesso!" });
+
+    } catch (error) {
+        console.error(`ERRO DETALHADO NO PATCH /api/efetivo/${req.params.id}:`, error);
+        res.status(500).json({ error: "Erro ao atualizar o efetivo.", details: error.message });
+    }
+});
 
 module.exports = router;
