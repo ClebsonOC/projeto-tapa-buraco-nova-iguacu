@@ -4,20 +4,13 @@ const { v4: uuidv4 } = require("uuid");
 const config = require("./config");
 const utils = require("./utils");
 const google = require("./google-services");
+// MODIFICADO: Importar 'admin' para usar FieldValue para unir arrays de fotos
 const { firestore, admin } = require("./firebase-init");
 
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
-const isRecordEditableToday = (docData) => {
-    const dataRegistro = docData.registradoEm.toDate();
-    const hoje = new Date();
-    dataRegistro.setHours(0, 0, 0, 0);
-    hoje.setHours(0, 0, 0, 0);
-    return dataRegistro.getTime() === hoje.getTime();
-};
-
-// --- ROTAS DE AUTENTICAÇÃO E BUSCA (Sem alterações) ---
+// --- ROTAS DE AUTENTICAÇÃO E BUSCA ---
 router.post("/login", (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) return res.status(400).json({ error: "Usuário e senha são obrigatórios." });
@@ -55,7 +48,7 @@ router.get("/buscar-bairros", async (req, res) => {
     }
 });
 
-// --- ROTA DE CRIAÇÃO (CREATE) (Sem alterações) ---
+// --- ROTA DE CRIAÇÃO (CREATE) ---
 router.post("/salvar", upload.array("fotos"), async (req, res) => {
     try {
         if (!req.body.dados) return res.status(400).json({ error: "Dados do formulário não recebidos." });
@@ -90,7 +83,9 @@ router.post("/salvar", upload.array("fotos"), async (req, res) => {
     }
 });
 
-// --- ROTAS DE LEITURA (Sem alterações) ---
+// --- ROTAS DE LEITURA, ATUALIZAÇÃO E DELEÇÃO ---
+
+// LER (Read): Busca buracos com filtros
 router.get("/buracos", async (req, res) => {
     try {
         const { usuario, rua } = req.query;
@@ -116,8 +111,7 @@ router.get("/buracos", async (req, res) => {
     }
 });
 
-// --- ROTAS DE ATUALIZAÇÃO E DELEÇÃO ---
-
+// ATUALIZAR DIMENSÕES (Update): Altera as dimensões de um ÚNICO buraco.
 router.patch("/buracos/dimensoes/:docId", async (req, res) => {
     try {
         const { docId } = req.params;
@@ -127,8 +121,16 @@ router.patch("/buracos/dimensoes/:docId", async (req, res) => {
         const buracoRef = firestore.collection('buracos').doc(docId);
         const doc = await buracoRef.get();
 
-        if (!doc.exists) return res.status(404).json({ error: "Registro não encontrado." });
-        if (!isRecordEditableToday(doc.data())) {
+        if (!doc.exists) {
+            return res.status(404).json({ error: "Registro não encontrado." });
+        }
+
+        const dataRegistro = doc.data().registradoEm.toDate();
+        const hoje = new Date();
+        dataRegistro.setHours(0, 0, 0, 0);
+        hoje.setHours(0, 0, 0, 0);
+
+        if (dataRegistro.getTime() < hoje.getTime()) {
             return res.status(403).json({ error: "Ação não permitida. Registros só podem ser alterados no mesmo dia da criação." });
         }
 
@@ -139,16 +141,24 @@ router.patch("/buracos/dimensoes/:docId", async (req, res) => {
     }
 });
 
+// DELETAR SUBMISSÃO (Delete): Remove TODOS os buracos de uma mesma submissão.
 router.delete("/buracos/submission/:submissionId", async (req, res) => {
     try {
         const { submissionId } = req.params;
         if (!submissionId) return res.status(400).json({ error: "ID da submissão é obrigatório." });
 
         const snapshot = await firestore.collection('buracos').where('submissionId', '==', submissionId).limit(1).get();
-        if (snapshot.empty) return res.status(404).json({ error: "Visita não encontrada." });
+        if (snapshot.empty) {
+            return res.status(404).json({ error: "Visita não encontrada." });
+        }
 
         const primeiroDoc = snapshot.docs[0];
-        if (!isRecordEditableToday(primeiroDoc.data())) {
+        const dataRegistro = primeiroDoc.data().registradoEm.toDate();
+        const hoje = new Date();
+        dataRegistro.setHours(0, 0, 0, 0);
+        hoje.setHours(0, 0, 0, 0);
+
+        if (dataRegistro.getTime() < hoje.getTime()) {
             return res.status(403).json({ error: "Ação não permitida. A visita só pode ser deletada no mesmo dia da criação." });
         }
 
@@ -165,40 +175,7 @@ router.delete("/buracos/submission/:submissionId", async (req, res) => {
     }
 });
 
-router.post("/buracos/submission/:submissionId", async (req, res) => {
-    try {
-        const { submissionId } = req.params;
-        const { largura, comprimento, espessura } = req.body;
-        if (!submissionId || !largura || !comprimento || !espessura) {
-            return res.status(400).json({ error: "Dados incompletos para adicionar o buraco." });
-        }
-
-        const visitaSnapshot = await firestore.collection('buracos').where('submissionId', '==', submissionId).get();
-        if (visitaSnapshot.empty) {
-            return res.status(404).json({ error: "Visita não encontrada." });
-        }
-
-        if (!isRecordEditableToday(visitaSnapshot.docs[0].data())) {
-            return res.status(403).json({ error: "Não é possível adicionar buracos a visitas de dias anteriores." });
-        }
-
-        const dadosBase = visitaSnapshot.docs[0].data();
-        const proximoNumero = visitaSnapshot.docs.length + 1;
-
-        const novoBuraco = {
-            ...dadosBase,
-            identificadorBuraco: `TAPA BURACO ${proximoNumero}`,
-            dimensoes: { largura, comprimento, espessura },
-        };
-
-        await firestore.collection('buracos').add(novoBuraco);
-        res.status(201).json({ message: `TAPA BURACO ${proximoNumero} adicionado com sucesso à visita!` });
-
-    } catch (error) {
-        res.status(500).json({ error: "Erro ao adicionar novo buraco." });
-    }
-});
-
+// NOVO: Adicionar fotos a uma visita existente
 router.patch("/buracos/fotos/:submissionId", upload.array("fotos"), async (req, res) => {
     try {
         const { submissionId } = req.params;
@@ -211,12 +188,17 @@ router.patch("/buracos/fotos/:submissionId", upload.array("fotos"), async (req, 
             return res.status(404).json({ error: "Visita não encontrada." });
         }
 
-        const primeiroDoc = visitaSnapshot.docs[0].data();
-        if (!isRecordEditableToday(primeiroDoc)) {
+        const primeiroDocData = visitaSnapshot.docs[0].data();
+        const dataRegistro = primeiroDocData.registradoEm.toDate();
+        const hoje = new Date();
+        dataRegistro.setHours(0, 0, 0, 0);
+        hoje.setHours(0, 0, 0, 0);
+
+        if (dataRegistro.getTime() < hoje.getTime()) {
             return res.status(403).json({ error: "Não é possível adicionar fotos a visitas de dias anteriores." });
         }
 
-        const linksNovasFotos = await google.uploadFiles(req.files, primeiroDoc.rua, primeiroDoc.registradoEm.toDate());
+        const linksNovasFotos = await google.uploadFiles(req.files, primeiroDocData.rua, primeiroDocData.registradoEm.toDate());
         if (linksNovasFotos.length === 0) {
             return res.status(500).json({ error: "Falha ao fazer upload das fotos para o Drive." });
         }
@@ -233,67 +215,12 @@ router.patch("/buracos/fotos/:submissionId", upload.array("fotos"), async (req, 
         res.status(200).json({ message: "Fotos adicionadas com sucesso!" });
 
     } catch (error) {
-        res.status(500).json({ error: "Erro ao adicionar novas fotos." });
+        console.error("Erro ao adicionar novas fotos:", error);
+        res.status(500).json({ error: "Erro interno ao adicionar novas fotos." });
     }
 });
 
-// ALTERADO: Lógica da transação corrigida
-router.delete("/buracos/:docId", async (req, res) => {
-    try {
-        const { docId } = req.params;
-        const { submissionId } = req.body;
-        if (!docId || !submissionId) {
-            return res.status(400).json({ error: "ID do documento e da submissão são obrigatórios." });
-        }
-
-        // --- ETAPA 1: Ler todos os dados e fazer as checagens fora da transação ---
-        const docRef = firestore.collection('buracos').doc(docId);
-        const docToDelete = await docRef.get();
-        if (!docToDelete.exists) {
-            return res.status(404).json({ error: "Registro de buraco não encontrado." });
-        }
-        if (!isRecordEditableToday(docToDelete.data())) {
-            return res.status(403).json({ error: "Não é possível deletar registros de dias anteriores." });
-        }
-
-        const allDocsSnapshot = await firestore.collection('buracos')
-            .where('submissionId', '==', submissionId).get();
-        
-        // --- ETAPA 2: Processar os dados em memória para decidir o que escrever ---
-        const docsParaManter = allDocsSnapshot.docs
-            .filter(d => d.id !== docId) // Exclui o que será deletado
-            .sort((a, b) => { // Ordena os restantes para garantir a nova sequência
-                const partsA = a.data().identificadorBuraco.split(' ');
-                const numA = parseInt(partsA[partsA.length - 1]);
-                const partsB = b.data().identificadorBuraco.split(' ');
-                const numB = parseInt(partsB[partsB.length - 1]);
-                return numA - numB;
-            });
-
-        // --- ETAPA 3: Executar todas as escritas dentro de uma única transação ---
-        await firestore.runTransaction(async (transaction) => {
-            // Escrita 1: Deletar o documento alvo
-            transaction.delete(docRef);
-
-            // Escrita 2: Atualizar os documentos restantes
-            docsParaManter.forEach((doc, index) => {
-                const novoIdentificador = `TAPA BURACO ${index + 1}`;
-                if (doc.data().identificadorBuraco !== novoIdentificador) {
-                    transaction.update(doc.ref, { identificadorBuraco: novoIdentificador });
-                }
-            });
-        });
-
-        res.status(200).json({ message: "Buraco deletado e sequência reordenada com sucesso." });
-
-    } catch (error) {
-        console.error("LOG DETALHADO DO ERRO NA TRANSAÇÃO:", error); // Adicionado para facilitar a depuração futura
-        res.status(500).json({ error: "Erro na transação de deleção e reordenação." });
-    }
-});
-
-
-// --- ROTAS DE EFETIVO (Sem alterações) ---
+// --- ROTAS DE EFETIVO ---
 router.post("/efetivo", async (req, res) => {
     try {
         const { registradoPor, itensPresentes, observacao } = req.body;
