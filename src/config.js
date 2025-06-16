@@ -22,12 +22,13 @@ const CACHE_EXPIRATION_BAIRROS_MS = 3600 * 1000 * 24; // 24 horas
 
 // Simulação de Banco de Dados de Usuários
 const USERS_DATABASE = {
-  antonio: { password: "lytoranea", sheetName: "DadosAntonio" },
-  thiago: { password: "lytoranea", sheetName: "DadosThiago" },
-  felipe: { password: "lytoranea", sheetName: "DadosFelipe" },
-  marcus: { password: "lytoranea", sheetName: "DadosMarcus" },
-  alexandro: { password: "lytoranea", sheetName: "DadosAlexandro" },
-  erivelto: { password: "lytoranea", sheetName: "DadosErivelto" },
+  "michel.silva": { password: "lytoranea", sheetName: "DadosMichel" },
+  "fabricio.santos": { password: "lytoranea", sheetName: "DadosFabricio" },
+  "leonardo.lanes": { password: "lytoranea", sheetName: "DadosLeonardo" },
+  "fabio.rogerio": { password: "lytoranea", sheetName: "DadosFabio" },
+  "elioenai.soares": { password: "lytoranea", sheetName: "DadosElioenai" },
+  "brendon.macedo": { password: "lytoranea", sheetName: "DadosBrendon" },
+  "teste": { password: "medicao", sheetName: "DadosTeste" }
 };
 
 // Cabeçalho Padrão para as Planilhas
