@@ -19,10 +19,10 @@ h2 { font-size: 1.5em; font-weight: 600; margin-top: 40px; margin-bottom: 20px; 
 
 /* --- FORMULÁRIOS E INPUTS --- */
 label { display: block; margin-top: 15px; margin-bottom: 8px; font-weight: 600; font-size: 0.9em; color: var(--texto-label); text-transform: uppercase; }
-input[type="text"], input[type="file"], select {
+input[type="text"], input[type="file"], select, textarea {
     width: 100%; padding: 12px 15px; border: 1px solid var(--borda-cor); border-radius: 8px; box-sizing: border-box; font-size: 1rem; background-color: #fcfdff; transition: border-color 0.2s, box-shadow 0.2s;
 }
-input[type="text"]:focus, select:focus {
+input[type="text"]:focus, select:focus, textarea:focus {
     outline: none; border-color: var(--cor-primaria); box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
 }
 .form-row { display: flex; flex-wrap: wrap; gap: 25px; }
@@ -78,6 +78,28 @@ button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 10p
 #statusSalvar.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 .spinner { border: 4px solid rgba(0,0,0,0.1); width: 24px; height: 24px; border-radius: 50%; border-left-color: #007bff; animation: spin 1s ease infinite; display: none; margin: 10px auto; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* --- NOVO: Estilo para o campo de observação, copiado do efetivo.css --- */
+.observacao-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    color: var(--texto-label, #7f8c8d);
+}
+.observacao-group textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px;
+    font-size: 1em;
+    border-radius: 6px;
+    border: 1px solid var(--borda-cor, #dee2e6);
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+
 /* --- ESTILOS DO POPUP DE SUCESSO --- */
 .success-overlay {
     position: fixed;
@@ -139,28 +161,6 @@ button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 10p
     margin: 0 auto;
     box-shadow: inset 0px 0px 0px var(--cor-sucesso, #2ecc71);
     animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
-}
-
-.checkmark-stem {
-    top: 50%;
-    left: calc(50% - 2px);
-    width: 4px;
-    height: 20px;
-    background: var(--cor-sucesso, #2ecc71);
-    position: absolute;
-    transform-origin: 50% 100%;
-    transform: translateY(-10px) rotate(45deg);
-}
-
-.checkmark-kick {
-    top: 50%;
-    left: calc(50% - 2px);
-    width: 4px;
-    height: 40px;
-    background: var(--cor-sucesso, #2ecc71);
-    position: absolute;
-    transform-origin: 50% 0;
-    transform: translateY(-20px) rotate(-45deg);
 }
 
 .success-checkmark div {

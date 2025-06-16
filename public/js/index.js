@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const salvarTudoBtnElement = document.getElementById('salvarTudoBtn');
     const statusSalvarElement = document.getElementById('statusSalvar');
     const loadingSpinnerElement = document.getElementById('loadingSpinner');
-    const fotoGeralInputElement = document.getElementById('fotoGeralInput');
+    const observacaoInputElement = document.getElementById('observacaoInput'); // NOVO
     const successOverlay = document.getElementById('success-overlay');
 
     let debounceTimer;
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     function resetarFormularioCompleto() {
         ruaInputElement.value = '';
         bairroSelectElement.value = '';
-        fotoGeralInputElement.value = null;
+        observacaoInputElement.value = ''; // NOVO
         buracosContainerElement.innerHTML = '';
         document.getElementById('tempoBom').checked = true;
         statusSalvarElement.textContent = '';
@@ -143,21 +143,23 @@ document.addEventListener('DOMContentLoaded', (event) => {
         statusSalvarElement.textContent = '';
         statusSalvarElement.className = '';
 
-        const formData = new FormData();
+        // MODIFICADO: Não usa mais FormData, envia JSON diretamente
         const dados = {
             rua: ruaSelecionada,
             bairro: bairroSelecionado,
             buracos: dadosDosBuracos,
             condicaoTempo: document.querySelector('input[name="condicaoTempo"]:checked').value,
+            observacao: observacaoInputElement.value.trim(), // NOVO
             username: localStorage.getItem('loggedInUser')
         };
-        formData.append('dados', JSON.stringify(dados));
-        const arquivosDeFoto = fotoGeralInputElement.files;
-        for (let i = 0; i < arquivosDeFoto.length; i++) {
-            formData.append('fotos', arquivosDeFoto[i]);
-        }
-
-        fetch('/api/salvar', { method: 'POST', body: formData })
+        
+        fetch('/api/salvar', { 
+            method: 'POST', 
+            headers: {
+                'Content-Type': 'application/json' // NOVO HEADER
+            },
+            body: JSON.stringify(dados) // Envia o objeto de dados como JSON
+        })
             .then(response => response.json().then(data => ({ ok: response.ok, body: data })))
             .then(({ ok, body }) => {
                 if (ok) {

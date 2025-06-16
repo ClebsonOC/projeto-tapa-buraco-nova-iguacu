@@ -1,20 +1,20 @@
 // public/js/relatorio.js
 
-// Variável global para guardar todos os registros do usuário e não precisar buscar na API toda hora
 let todosOsRegistros = [];
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Ao carregar a página, busca os dados da API uma única vez
+    // CORREÇÃO: Garante que o popup de carregamento comece sempre escondido
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) {
+        loadingOverlay.classList.remove('active');
+    }
+
     carregarDadosDaAPI();
 
-    // Adiciona os "escutadores" de eventos aos campos de filtro
     const filtroRua = document.getElementById('filtro-rua');
-    if(filtroRua) filtroRua.addEventListener('keyup', () => renderizarTabela());
+    if (filtroRua) filtroRua.addEventListener('keyup', () => renderizarTabela());
 });
 
-/**
- * Função responsável APENAS por buscar os dados do usuário no backend.
- */
 function carregarDadosDaAPI() {
     const loadingDiv = document.getElementById('loading');
     const loggedInUser = localStorage.getItem('loggedInUser');
@@ -33,9 +33,7 @@ function carregarDadosDaAPI() {
                 loadingDiv.innerHTML = `<span style="color: red;">${data.error}</span>`;
                 return;
             }
-            // Guarda os dados na nossa variável global
             todosOsRegistros = data;
-            // Chama a função para renderizar a tabela pela primeira vez
             renderizarTabela();
         })
         .catch(error => {
@@ -43,10 +41,6 @@ function carregarDadosDaAPI() {
         });
 }
 
-/**
- * Função responsável por FILTRAR, AGRUPAR e DESENHAR a tabela.
- * Ela usa os dados que já estão na variável `todosOsRegistros`.
- */
 function renderizarTabela() {
     const loadingDiv = document.getElementById('loading');
     const tableBody = document.getElementById('report-table-body');
@@ -55,32 +49,26 @@ function renderizarTabela() {
     loadingDiv.style.display = 'none';
     tableBody.innerHTML = '';
 
-    // 1. Filtra os dados em memória com base no que foi digitado
     const dadosFiltrados = todosOsRegistros.filter(item => {
         return filtroRuaValue ? item.rua.toUpperCase().includes(filtroRuaValue) : true;
     });
 
-    // 2. Agrupa os dados JÁ FILTRADOS por 'submissionId'
     const groupedBySubmission = dadosFiltrados.reduce((acc, item) => {
         const id = item.submissionId;
-        if (!acc[id]) {
-            acc[id] = [];
-        }
+        if (!acc[id]) acc[id] = [];
         acc[id].push(item);
         return acc;
     }, {});
 
     if (Object.keys(groupedBySubmission).length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum registro encontrado para os filtros aplicados.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum registro encontrado.</td></tr>';
         return;
     }
 
-    // 3. Renderiza UMA linha principal para CADA GRUPO
     for (const submissionId in groupedBySubmission) {
         const group = groupedBySubmission[submissionId];
         const firstItem = group[0];
         const dataFormatada = new Date(firstItem.registradoEm._seconds * 1000).toLocaleString('pt-BR');
-        
         const isEditable = isRegistroEditavel(firstItem);
         
         const mainRow = document.createElement('tr');
@@ -94,9 +82,7 @@ function renderizarTabela() {
             <td>${firstItem.rua}</td>
             <td>${firstItem.bairro}</td>
             <td>${firstItem.registradoPor}</td>
-            <td class="actions">
-                ${acaoDeletarHtml}
-            </td>
+            <td class="actions">${acaoDeletarHtml}</td>
         `;
         tableBody.appendChild(mainRow);
         
@@ -109,25 +95,22 @@ function renderizarTabela() {
              .forEach(buraco => {
             const dim = buraco.dimensoes;
             const acaoEditarHtml = isEditable ?
-                `<button class="btn-update" style="padding: 4px 8px; font-size: 0.8em;" onclick="editarBuraco('${buraco.id}', '${dim.largura}', '${dim.comprimento}', '${dim.espessura}')">Editar</button>` :
-                '';
-
-            detailsHtml += `
-                <p style="display:flex; justify-content:space-between; align-items:center;">
-                    <span><strong>${buraco.identificadorBuraco}:</strong> L: ${dim.largura}m, C: ${dim.comprimento}m, E: ${dim.espessura}cm</span>
-                    ${acaoEditarHtml}
-                </p>`;
+                `<button class="btn-update" style="padding: 4px 8px; font-size: 0.8em;" onclick="editarBuraco('${buraco.id}', '${dim.largura}', '${dim.comprimento}', '${dim.espessura}')">Editar</button>` : '';
+            detailsHtml += `<p style="display:flex; justify-content:space-between; align-items:center;"><span><strong>${buraco.identificadorBuraco}:</strong> L: ${dim.largura}m, C: ${dim.comprimento}m, E: ${dim.espessura}cm</span>${acaoEditarHtml}</p>`;
         });
-        
-        // NOVO: Adiciona o botão "Adicionar Fotos" se a visita for editável
+
         const acoesVisitaHtml = isEditable ? `
             <div class="visita-actions" style="margin-top: 20px; display: flex; gap: 10px;">
                 <button class="btn-add-photo" onclick="document.getElementById('file-input-${submissionId}').click()">Adicionar Fotos</button>
                 <input type="file" multiple style="display:none;" id="file-input-${submissionId}" onchange="adicionarNovasFotos(this, '${submissionId}')">
-            </div>
-        ` : '';
+            </div>` : '';
 
-        const linksHtml = (firstItem.fotosDriveLinks || []).map(link => `<a href="${link}" target="_blank">${link}</a>`).join('<br>') || 'Nenhuma foto.';
+        const linksHtml = (firstItem.fotosDriveLinks && firstItem.fotosDriveLinks.length > 0)
+            ? firstItem.fotosDriveLinks.map(link => `<a href="${link}" target="_blank">${link}</a>`).join('<br>')
+            : 'Nenhuma foto.';
+        
+        const observacaoHtml = `<p><strong>Observação:</strong> ${firstItem.observacao || 'Nenhuma.'}</p>`;
+
         detailsRow.innerHTML = `
             <td colspan="6">
                 <div class="details-content">
@@ -135,6 +118,7 @@ function renderizarTabela() {
                     ${detailsHtml}
                     <hr style="border:0; border-top:1px solid #ddd; margin:15px 0;">
                     <p><strong>Condição do Tempo:</strong> ${firstItem.condicaoTempo}</p>
+                    ${observacaoHtml}
                     <p><strong>Links das Fotos:</strong><br>${linksHtml}</p>
                     ${acoesVisitaHtml}
                 </div>
@@ -143,9 +127,6 @@ function renderizarTabela() {
     }
 }
 
-/**
- * Função auxiliar que verifica se um registro pode ser editado (criado no mesmo dia)
- */
 function isRegistroEditavel(item) {
     const dataRegistro = new Date(item.registradoEm._seconds * 1000);
     const hoje = new Date();
@@ -154,9 +135,6 @@ function isRegistroEditavel(item) {
            dataRegistro.getDate() === hoje.getDate();
 }
 
-/**
- * Funções de ação para os botões
- */
 function toggleDetails(button, detailsId) {
     const detailsRow = document.getElementById(detailsId);
     if (detailsRow) {
@@ -170,7 +148,7 @@ function deletarVisita(submissionId) {
     fetch(`/api/buracos/submission/${submissionId}`, { method: 'DELETE' })
     .then(res => res.json()).then(data => {
         alert(data.message || data.error);
-        carregarDadosDaAPI(); // Recarrega os dados da API após deletar
+        carregarDadosDaAPI();
     });
 }
 
@@ -191,38 +169,32 @@ function editarBuraco(docId, larguraAtual, comprimentoAtual, espessuraAtual) {
     })
     .then(res => res.json()).then(data => {
         alert(data.message || data.error);
-        carregarDadosDaAPI(); // Recarrega os dados da API após editar
+        carregarDadosDaAPI();
     });
 }
 
-// NOVO: Função para adicionar novas fotos a uma visita existente
 function adicionarNovasFotos(fileInput, submissionId) {
-    if (fileInput.files.length === 0) {
-        return;
-    }
-
+    if (fileInput.files.length === 0) return;
+    
+    const loadingOverlay = document.getElementById('loading-overlay');
     const formData = new FormData();
     for (const file of fileInput.files) {
         formData.append('fotos', file);
     }
-
-    fetch(`/api/buracos/fotos/${submissionId}`, {
-        method: 'PATCH',
-        body: formData
-    })
+    
+    loadingOverlay.classList.add('active'); // Mostra o popup
+    
+    fetch(`/api/buracos/fotos/${submissionId}`, { method: 'PATCH', body: formData })
     .then(res => res.json())
     .then(data => {
         alert(data.message || data.error);
-        if (!data.error) {
-            carregarDadosDaAPI(); // Recarrega tudo para ver as novas fotos
-        }
+        if (!data.error) carregarDadosDaAPI();
     })
     .catch(err => {
-        console.error("Erro no upload de fotos:", err);
         alert("Ocorreu um erro ao enviar as fotos.");
     })
     .finally(() => {
-        // Limpa o valor do input para permitir o upload do mesmo arquivo novamente
+        loadingOverlay.classList.remove('active'); // Esconde o popup
         fileInput.value = '';
     });
 }

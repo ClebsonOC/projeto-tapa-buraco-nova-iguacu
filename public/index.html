@@ -59,9 +59,12 @@
             <input type="radio" id="tempoChuva" name="condicaoTempo" value="Chuva">
             <label for="tempoChuva">Chuva</label>
         </div>
-
-        <label for="fotoGeralInput" style="margin-top: 30px;">4. Adicionar Foto(s) (Opcional):</label>
-        <input type="file" id="fotoGeralInput" name="fotoGeralInput" accept="image/*" multiple>
+        
+        <h2>4. Observações (Opcional)</h2>
+        <div class="observacao-group">
+            <label for="observacaoInput">Detalhes da obsevação:</label>
+            <textarea id="observacaoInput" rows="4" placeholder="Ex: Considerar espessura como..."></textarea>
+        </div>
 
         <div style="text-align: center; margin-top: 30px;">
             <button type="button" id="salvarTudoBtn">Salvar Dados dos Buracos</button>
